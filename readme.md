@@ -7,6 +7,9 @@ municipalities.csv - A csv containing a WKT column with Polygon WKT values creat
 
 The Python script also assumes that the imported custom geographic role is called municipalities - it searches inside of the .Hyper file for a table with this name.
 
+Install requirements:
+
+`pip install -r requirements.txt`
 
 To run:
 `run -i GeocodingData.hyper -o GeocodingData_out.hyper -w municipalities.csv `
