@@ -93,23 +93,19 @@ class CsvQueryClass:
 
     def open_csv(self, path):
         #Open a specified .csv, and read the rows. Later we'll look thru the rows and use the WKT we find to insert into the local_data table for a given table name
-        # Using path to current file, create a path that locates CSV file packaged with these examples.
-        #path_to_csv = str(Path(__file__).parent / "data" / "municipalities.csv")
-        path_to_csv = "municipalities.csv"
-
         with open(path, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             self.fieldnames = reader.fieldnames
             self.rows = [row for row in reader]
 
-    def get_wkt_by_id(self, id):
-        #Given a unique id, read thru the rows and pull out the 'WKT' value.
-        #The CSV must have a field called WKT
+    def get_wkt_by_centroid(self, lat, lng):
+        #Given a centroid, read thru the rows and pull out the 'WKT' value that  matches it.
+        #The CSV must have a field called WKT and Latitude and Longitude
         if len(self.rows) < 1:
             return ''
 
         for row in self.rows:
-            if(id == row['NAME']):
+            if(Decimal(lat) == Decimal(row['Latitude']) and Decimal(lng) == Decimal(row['Longitude'])):
                 return row['WKT']
 
 
@@ -129,15 +125,7 @@ class AppendWKTColumns:
                                 required=True, help="Output .hyper file")
         arg_parser.add_argument("-w", "--wkt_path", type=Path, metavar="<wkt.csv>",
                                 required=True, help="Path to a .csv file containing a WKT column and a unique ID.")
-        # arg_parser.add_argument("-id", "--unique_id",
-        #                         required=True, help="Column name containing unique ID that will tie the ROW in the WKT to the row in the geocoidng DB.")
-        # arg_parser.add_argument("-m", "--mode", type=AdjustVertexOrderMode, choices=list(AdjustVertexOrderMode),
-        #                         required=True, help="Vertex order adjustment mode: "
-        #                         "(auto | invert). Auto: assuming data comes "
-        #                         "from a source with a flat - earth topology, "
-        #                         "it automatically adjusts the vertex order according "
-        #                         "to the interior - left definition of polygons. "
-        #                         "Invert: inverts the vertex order for all polygons.")
+
 
     def run(self, args):
         """ Runs the command
@@ -152,23 +140,29 @@ class AppendWKTColumns:
 
         subprocess.call(["rm", "-rf", str(output_file)])
         shutil.copyfile(input_file, output_file)
+
         # Starts the Hyper Process with telemetry enabled to send data to Tableau.
         # To opt out, simply set telemetry=Telemetry.DO_NOT_SEND_USAGE_DATA_TO_TABLEAU.
         with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU) as hyper:
             with Connection(endpoint=hyper.endpoint,
                             database=output_file) as connection:
-                table_name = TableName("public", "LocalDatamunicipalities")
+                table_name = TableName("public", "LocalDatamunicipalities")  #TODO: Make this dynamic based on an input parameter.
                 geo_name = Name('Geometry')
-                id_name = Name('ParentID')
                 map_code_name = Name('MapCode')
+                latitude_name = Name('Latitude')
+                longitude_name = Name('Longitude')
+
                 connection.execute_query(f"ALTER TABLE {table_name} ADD COLUMN {geo_name} TEXT,"
                                          f" ADD COLUMN {map_code_name} INTEGER").close()
                 for mrow in csv_query.rows:
                     id = mrow['OBJECTID']
+                    lat = mrow['Latitude']
+                    lng = mrow['Longitude']
                     wkt = mrow['WKT']
                     with connection.execute_query(f"UPDATE {table_name}" +
                                                   f" SET {geo_name}={escape_string_literal(wkt)}, {map_code_name}=0" +
-                                                  f" WHERE {id_name}={id}") as result:
+                                                  f" WHERE {latitude_name}={lat}"
+                                                  f" AND {longitude_name}={lng}") as result:
                         print(f"for {id} - {len(wkt)} added, {result.affected_row_count} rows changed")
         print('done')
 
