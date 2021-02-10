@@ -12,7 +12,7 @@ Install requirements:
 `pip install -r requirements.txt`
 
 To run:
-`run -i GeocodingData.hyper -o GeocodingData_out.hyper -w municipalities.csv `
+`run -i GeocodingData.hyper -o GeocodingData_out.hyper -w municipalities_wkt.csv `
 
 ...where
 

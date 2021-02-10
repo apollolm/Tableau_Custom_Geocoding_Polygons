@@ -97,7 +97,7 @@ class CsvQueryClass:
         #path_to_csv = str(Path(__file__).parent / "data" / "municipalities.csv")
         path_to_csv = "municipalities.csv"
 
-        with open(path_to_csv, newline='') as csvfile:
+        with open(path, newline='') as csvfile:
             reader = csv.DictReader(csvfile)
             self.fieldnames = reader.fieldnames
             self.rows = [row for row in reader]
@@ -157,7 +157,7 @@ class AppendWKTColumns:
         with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU) as hyper:
             with Connection(endpoint=hyper.endpoint,
                             database=output_file) as connection:
-                table_name = TableName("public", "LocalDatamunicipalities)
+                table_name = TableName("public", "LocalDatamunicipalities")
                 geo_name = Name('Geometry')
                 id_name = Name('ParentID')
                 map_code_name = Name('MapCode')
