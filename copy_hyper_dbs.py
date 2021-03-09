@@ -28,6 +28,7 @@ import shutil
 import subprocess
 import sys
 import csv
+import os
 
 from enum import Enum
 from pathlib import Path
@@ -125,7 +126,10 @@ class AppendWKTColumns:
                                 required=True, help="Output .hyper file")
         arg_parser.add_argument("-w", "--wkt_path", type=Path, metavar="<wkt.csv>",
                                 required=True, help="Path to a .csv file containing a WKT column and a unique ID.")
-
+        arg_parser.add_argument("-n", "--role_name", type=str, 
+                                required=True, help="Name of the geographic role")
+        arg_parser.add_argument("-id", "--id_field", type=str,
+                                required=True, help="Name of the unique ID field")
 
     def run(self, args):
         """ Runs the command
@@ -134,11 +138,18 @@ class AppendWKTColumns:
         input_file = args.input_file
         output_file = args.output_file
         wkt_file = Path(args.wkt_path)
+        role_name = args.role_name
+        id_field = args.id_field
         # Grab the CSV
         csv_query = CsvQueryClass()
         csv_query.open_csv(wkt_file)
-
-        subprocess.call(["rm", "-rf", str(output_file)])
+        
+        # if the output file already exists, delete
+        if os.path.exists(output_file):
+            if os.name == "nt": # deal with Windows
+                os.remove(output_file)
+            else:
+                subprocess.call(["rm", "-rf", output_file]) 
         shutil.copyfile(input_file, output_file)
 
         # Starts the Hyper Process with telemetry enabled to send data to Tableau.
