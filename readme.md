@@ -12,7 +12,7 @@ Install requirements:
 `pip install -r requirements.txt`
 
 To run:
-`run -i GeocodingData.hyper -o GeocodingData_out.hyper -w municipalities_wkt.csv `
+`run -i GeocodingData.hyper -o GeocodingData_out.hyper -w municipalities_wkt.csv -n municipalities -id OBJECTID`
 
 ...where
 
@@ -21,4 +21,8 @@ To run:
 `-o ` is the output hyper file that will be created
 
 `-w` is the .csv file continaing the WKT polygons that will be added to the .hyper file. A `WKT` column must exist in this file.
+
+`-n` is the name of the geographic role created in Tableau
+
+`-id` is the name of the unique ID field in your .csv
 
