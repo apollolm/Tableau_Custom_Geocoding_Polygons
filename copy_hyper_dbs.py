@@ -157,7 +157,7 @@ class AppendWKTColumns:
         with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU) as hyper:
             with Connection(endpoint=hyper.endpoint,
                             database=output_file) as connection:
-                table_name = TableName("public", "LocalDatamunicipalities")  #TODO: Make this dynamic based on an input parameter.
+                table_name = TableName("public", "LocalData" + role_name)  #TODO: Make this dynamic based on an input parameter.
                 geo_name = Name('Geometry')
                 map_code_name = Name('MapCode')
                 latitude_name = Name('Latitude')
