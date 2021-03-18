@@ -166,7 +166,6 @@ class AppendWKTColumns:
                 connection.execute_query(f"ALTER TABLE {table_name} ADD COLUMN {geo_name} TEXT,"
                                          f" ADD COLUMN {map_code_name} INTEGER").close()
                 for mrow in csv_query.rows:
-                    id = mrow['OBJECTID']
                     lat = mrow['Latitude']
                     lng = mrow['Longitude']
                     wkt = mrow['WKT']
@@ -174,7 +173,7 @@ class AppendWKTColumns:
                                                   f" SET {geo_name}={escape_string_literal(wkt)}, {map_code_name}=0" +
                                                   f" WHERE {latitude_name}={lat}"
                                                   f" AND {longitude_name}={lng}") as result:
-                        print(f"for {id} - {len(wkt)} added, {result.affected_row_count} rows changed")
+                        print(f"{result.affected_row_count} rows changed")
         print('done')
 
 
